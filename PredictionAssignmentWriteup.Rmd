@@ -1,0 +1,94 @@
+---
+title: "Practical Machine Learning: Prediction Assignment Writeup"
+author: "Kuprashevich Maksim"
+
+output: html_document
+---
+
+*My native lang is not english, but I will try my best*
+
+This is report for <a href="https://class.coursera.org/predmachlearn-016">Practical Machine Learning</a> course on Coursera about study <a href="http://groupware.les.inf.puc-rio.br/har">Weight Lifting Exercises Dataset</a>
+
+For some errors that I can't solve, train function in Caret package doesn't work with that data, so in this research I used old package for SVM **e1071**.
+```
+# Loading train and test data from files
+train <- read.csv(file="pml-training.csv", head=TRUE, sep=",")
+test <- read.csv(file="pml-testing.csv", head=TRUE, sep=",")
+```
+
+First of all, I've found in data useless (in my opinion) columns and NA values that I wish to be removed, so I defined function:
+```
+clean_data = function(x) {
+  x <- x[, which(colSums(apply(x, 2, is.na)) == 0)]
+  x <- x[, -which(names(x) %in% c("new_window","num_window", "raw_timestamp_part_1", 
+                                  "raw_timestamp_part_2", "cvtd_timestamp", "X", "user_name"))]
+  return(x)
+}
+
+# Clean unuseful NA's and columns
+train <- clean_data(train)
+test <- clean_data(test)
+```
+Second moment I've noted - train and test datasets has different number of coulumns, so I did cross sync (with saving classe column):
+```
+classe_column <- train$classe
+test <- test[ , which(names(test) %in% names(train))]
+train <- train[ , which(names(train) %in% names(test))]
+train["classe"] <- classe_column
+```
+
+Then I tried to find optimal values for SVM parameters with tuned function, that uses 10-fold cross validation with greedy search algorithm for best parameters:
+```
+# Get best parameters for SVM
+tuned <- tune.svm(classe~., data = train, gamma = 10^(-6:-1), cost = 10^(1:2))
+summary(tuned)
+```
+
+Output after 3 hours of work :) :
+```
+Parameter tuning of ‘svm’:
+- sampling method: 10-fold cross validation 
+- best parameters:
+ gamma cost
+  0.1  100
+
+- best performance: 0.002955933 
+
+- Detailed performance results:
+  gamma cost       error  dispersion
+1  1e-06   10 0.715675626 0.007197491
+2  1e-05   10 0.491182545 0.011745177
+3  1e-04   10 0.346855226 0.008049616
+4  1e-03   10 0.148149092 0.007390940
+5  1e-02   10 0.022424097 0.003050693
+6  1e-01   10 0.004077082 0.001698800
+7  1e-06  100 0.491488251 0.012069983
+8  1e-05  100 0.351085006 0.007911848
+9  1e-04  100 0.239678782 0.008431634
+10 1e-03  100 0.061309065 0.005592526
+11 1e-02  100 0.006574274 0.001740053
+12 1e-01  100 0.002955933 0.001172241
+```
+
+```{r plot, message = FALSE}
+plot(c(0.000001, 0.00001, 0.0001, 0.001, 0.01, 0.1), c(0.491488251, 0.351085006, 0.239678782, 0.061309065, 0.006574274, 0.002955933), type = "p", ylab = "error", xlab = "gamma", main = "gamma-error relation with cost 100", col = "red", pch = 19)
+```
+
+In such way I found best values for gamma `0.1` and cost `100`, with error `0.002955933` and dispersion `0.001172241`. That's not bad.
+
+Time for train model:
+```
+model  <- svm(classe~., data = train, kernel = "radial", gamma = 0.1, cost = 100)
+```
+And predict test dataset:
+```
+prediction <- predict(model, newdata = test)
+```
+
+Prediction results:
+```
+1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 
+B  A  B  A  A  E  D  B  A  A  B  C  B  A  E  E  A  B  B  B 
+```
+
+It's 19 of 20 success predictions in Course Project Submission. Problem 11 failed, so seems that I missed something, but I dont know what.
