@@ -20,8 +20,7 @@ First of all, I've found in data useless (in my opinion) columns and NA values t
 ```
 clean_data = function(x) {
   x <- x[, which(colSums(apply(x, 2, is.na)) == 0)]
-  x <- x[, -which(names(x) %in% c("new_window","num_window", "raw_timestamp_part_1", 
-                                  "raw_timestamp_part_2", "cvtd_timestamp", "X", "user_name"))]
+  x <- x[, -which(names(x) %in% c("new_window","num_window", "cvtd_timestamp", "X", "user_name"))]
   return(x)
 }
 
@@ -91,4 +90,4 @@ Prediction results:
 B  A  B  A  A  E  D  B  A  A  B  C  B  A  E  E  A  B  B  B 
 ```
 
-It's 19 of 20 success predictions in Course Project Submission. Problem 11 failed, so seems that I missed something, but I dont know what.
+It's 19 of 20 success predictions in Course Project Submission. Problem 11 failed, so seems that I missed something, but I dont know what. Right answer on that problem 11 is "C", I found it with linear core SVM.

@@ -66,8 +66,7 @@ test &lt;- read.csv(file=&quot;pml-testing.csv&quot;, head=TRUE, sep=&quot;,&quo
 <p>First of all, I’ve found in data useless (in my opinion) columns and NA values that I wish to be removed, so I defined function:</p>
 <pre><code>clean_data = function(x) {
   x &lt;- x[, which(colSums(apply(x, 2, is.na)) == 0)]
-  x &lt;- x[, -which(names(x) %in% c(&quot;new_window&quot;,&quot;num_window&quot;, &quot;raw_timestamp_part_1&quot;, 
-                                  &quot;raw_timestamp_part_2&quot;, &quot;cvtd_timestamp&quot;, &quot;X&quot;, &quot;user_name&quot;))]
+  x &lt;- x[, -which(names(x) %in% c(&quot;new_window&quot;,&quot;num_window&quot;, &quot;cvtd_timestamp&quot;, &quot;X&quot;, &quot;user_name&quot;))]
   return(x)
 }
 
@@ -116,7 +115,7 @@ summary(tuned)</code></pre>
 <p>Prediction results:</p>
 <pre><code>1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 
 B  A  B  A  A  E  D  B  A  A  B  C  B  A  E  E  A  B  B  B </code></pre>
-<p>It’s 19 of 20 success predictions in Course Project Submission. Problem 11 failed, so seems that I missed something, but I dont know what.</p>
+<p>It’s 19 of 20 success predictions in Course Project Submission. Problem 11 failed, so seems that I missed something, but I dont know what. Right answer on that problem 11 is “C”, I found it with linear core SVM.</p>
 
 
 </div>
